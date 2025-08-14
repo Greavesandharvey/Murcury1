@@ -1,0 +1,276 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Main Background Colors - Dark Navy Theme */
+  --background: hsl(213, 45%, 8%);          /* Very dark navy blue */
+  --foreground: hsl(0, 0%, 98%);            /* Pure white text */
+  --sidebar-bg: hsl(213, 35%, 12%);         /* Sidebar dark navy */
+  --sidebar-hover: hsl(213, 35%, 15%);      /* Sidebar hover state */
+  
+  /* Card and Panel Colors */
+  --card: hsl(213, 40%, 10%);               /* Card background */
+  --card-foreground: hsl(0, 0%, 95%);       /* Card text */
+  --glass-bg: hsl(213, 45%, 8%, 0.9);       /* Glass morphism background */
+  --glass-border: hsl(213, 35%, 20%, 0.5);  /* Glass border */
+  
+  /* Navigation Colors */
+  --nav-section-text: hsl(45, 90%, 65%);    /* Yellow/Gold section headers */
+  --nav-link-text: hsl(0, 0%, 85%);         /* Navigation link text */
+  --nav-link-hover: hsl(213, 35%, 18%);     /* Navigation hover background */
+  --nav-link-active: hsl(213, 50%, 25%);    /* Active navigation item */
+  
+  /* Accent Colors */
+  --primary: hsl(45, 90%, 65%);             /* Primary yellow/gold */
+  --primary-foreground: hsl(213, 45%, 8%);  /* Primary text on gold */
+  --secondary: hsl(213, 35%, 20%);          /* Secondary navy */
+  --secondary-foreground: hsl(0, 0%, 95%);  /* Secondary text */
+  
+  /* Status Colors */
+  --success: hsl(120, 70%, 45%);            /* Success green */
+  --warning: hsl(45, 90%, 65%);             /* Warning yellow */
+  --danger: hsl(0, 70%, 60%);               /* Danger red */
+  --info: hsl(200, 80%, 60%);               /* Info blue */
+  
+  /* Border and Input Colors */
+  --border: hsl(213, 35%, 20%);             /* Standard borders */
+  --input: hsl(213, 35%, 15%);              /* Input backgrounds */
+  --muted: hsl(213, 30%, 18%);              /* Muted backgrounds */
+  --muted-foreground: hsl(213, 15%, 65%);   /* Muted text */
+  
+  /* Agent Status Colors */
+  --agent-active: hsl(120, 70%, 50%);       /* Active agent green */
+  --agent-standby: hsl(45, 90%, 65%);       /* Standby agent yellow */
+  --agent-offline: hsl(0, 50%, 50%);        /* Offline agent red */
+  --agent-efficiency: hsl(120, 60%, 45%);   /* Efficiency percentage */
+  
+  /* Glass Morphism Effects */
+  --glass-shadow: 0 8px 32px 0 rgba(13, 28, 56, 0.37);
+  --glass-backdrop: blur(4px);
+  
+  /* Border Radius */
+  --radius: 0.75rem;
+  
+  /* MercuryDivine theme colors - exact match */
+  --divine-amber: hsl(45, 100%, 65%);
+  --divine-purple: hsl(271, 81%, 56%);
+  --divine-teal: hsl(174, 72%, 56%);
+  --divine-indigo: hsl(243, 75%, 59%);
+  --divine-orange: hsl(25, 95%, 60%);
+  --divine-green: hsl(142, 71%, 45%);
+  --divine-red: hsl(0, 84%, 60%);
+  --divine-blue: hsl(217, 91%, 60%);
+  
+  /* Agent card colors */
+  --agent-janus: hsl(271, 81%, 56%);
+  --agent-juno: hsl(217, 91%, 60%);
+  --agent-saturn: hsl(45, 100%, 65%);
+  --agent-athena: hsl(174, 72%, 56%);
+  --agent-vulcan: hsl(25, 95%, 60%);
+  --agent-hercules: hsl(142, 71%, 45%);
+  --agent-mars: hsl(0, 84%, 60%);
+  --agent-neptune: hsl(217, 91%, 60%);
+  --agent-minerva: hsl(174, 72%, 56%);
+  --agent-apollo: hsl(45, 100%, 65%);
+}
+
+@layer components {
+  /* Sidebar Navigation Styling */
+  .sidebar {
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+  }
+  
+  .nav-section-header {
+    @apply flex items-center space-x-2 w-full p-3 text-left font-semibold text-sm rounded-lg cursor-pointer transition-colors;
+    color: var(--nav-section-text);
+  }
+  
+  .nav-section-header:hover {
+    background-color: var(--nav-link-hover);
+  }
+  
+  .nav-link {
+    @apply flex items-center space-x-3 w-full p-2.5 text-left rounded-lg text-sm transition-colors;
+    color: var(--nav-link-text);
+  }
+  
+  .nav-link:hover {
+    background-color: var(--nav-link-hover);
+  }
+  
+  .nav-link.active {
+    background-color: var(--nav-link-active);
+    color: var(--foreground);
+  }
+  
+  .nav-link-main {
+    @apply flex items-center space-x-3 w-full p-3 text-left rounded-lg font-medium transition-colors;
+    color: var(--nav-link-text);
+  }
+  
+  .nav-link-main:hover {
+    background-color: var(--nav-link-hover);
+  }
+  
+  .nav-link-main.active {
+    background-color: var(--nav-link-active);
+    color: var(--primary);
+  }
+
+  /* Glass Morphism Cards */
+  .glass-card {
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-backdrop);
+    box-shadow: var(--glass-shadow);
+    @apply rounded-xl;
+  }
+
+  /* Agent Status Components */
+  .agent-card {
+    @apply glass-card p-4 hover:scale-105 transition-transform duration-200;
+    background-color: var(--card);
+    border-color: var(--border);
+  }
+  
+  .agent-card .status-active {
+    background-color: var(--agent-active);
+    color: var(--card);
+  }
+  
+  .agent-card .status-standby {
+    background-color: var(--agent-standby);
+    color: var(--card);
+  }
+  
+  .agent-card .status-offline {
+    background-color: var(--agent-offline);
+    color: var(--foreground);
+  }
+  
+  .efficiency-text {
+    color: var(--agent-efficiency);
+    @apply font-bold;
+  }
+
+  /* Button Styling */
+  .primary-button {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    @apply font-semibold px-4 py-2 rounded-lg transition-all duration-200 hover:scale-105;
+  }
+  
+  .secondary-button {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid var(--border);
+    @apply font-medium px-3 py-1.5 rounded-md transition-colors hover:bg-opacity-80;
+  }
+
+  /* Metric Cards */
+  .metric-card {
+    @apply glass-card p-6 relative overflow-hidden;
+  }
+
+  .metric-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-10;
+  }
+
+  .metric-card.success::before {
+    background: linear-gradient(135deg, var(--success) 0%, transparent 100%);
+  }
+
+  .metric-card.warning::before {
+    background: linear-gradient(135deg, var(--warning) 0%, transparent 100%);
+  }
+
+  .metric-card.info::before {
+    background: linear-gradient(135deg, var(--info) 0%, transparent 100%);
+  }
+
+  .metric-card.danger::before {
+    background: linear-gradient(135deg, var(--danger) 0%, transparent 100%);
+  }
+
+  /* Text Styling */
+  .section-title {
+    @apply text-xl font-semibold mb-4;
+    color: var(--foreground);
+  }
+  
+  .subsection-title {
+    @apply text-lg font-medium mb-3;
+    color: var(--nav-section-text);
+  }
+  
+  .metric-value {
+    @apply text-2xl font-bold mb-1;
+  }
+  
+  .metric-label {
+    @apply text-sm opacity-75;
+    color: var(--muted-foreground);
+  }
+
+  /* Status Indicators */
+  .status-indicator {
+    @apply px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-indicator.active {
+    background-color: var(--success);
+    color: var(--card);
+  }
+  
+  .status-indicator.standby {
+    background-color: var(--warning);
+    color: var(--card);
+  }
+  
+  .status-indicator.offline {
+    background-color: var(--danger);
+    color: var(--foreground);
+  }
+
+  /* Jupiter Commander Special Styling */
+  .jupiter-panel {
+    @apply glass-card p-6 border-2;
+    border-color: var(--primary);
+    background: linear-gradient(135deg, var(--primary)/5 0%, transparent 50%);
+  }
+  
+  .jupiter-icon {
+    @apply p-3 rounded-lg;
+    background: linear-gradient(135deg, var(--primary)/20 0%, var(--warning)/20 100%);
+  }
+  
+  /* Divine gradient text */
+  .divine-gradient-text {
+    @apply bg-gradient-to-r from-amber-300 via-purple-300 to-teal-300 bg-clip-text text-transparent;
+  }
+
+  /* Divine glass morphism effects */
+  .divine-glass {
+    backdrop-filter: blur(12px);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Divine gradient backgrounds */
+  .divine-gradient {
+    background: linear-gradient(135deg, 
+      hsl(var(--divine-amber)) 0%, 
+      hsl(var(--divine-purple)) 50%, 
+      hsl(var(--divine-indigo)) 100%);
+  }
+
+  .divine-gradient-subtle {
+    background: linear-gradient(135deg, 
+      hsl(var(--divine-amber) / 0.1) 0%, 
+      hsl(var(--divine-purple) / 0.1) 50%, 
+      hsl(var(--divine-indigo) / 0.1) 100%);
+  }
+}
