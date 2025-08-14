@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout';
 import { Dashboard } from '@/pages/Dashboard';
 import { Landing } from '@/pages/Landing';
 import Customers from '@/pages/Customers';
+import PriceLists from '@/pages/PriceLists';
 
 // Placeholder component for routes not yet implemented
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -35,7 +36,7 @@ const Suppliers = () => <PlaceholderPage name="Suppliers" />;
 const PurchaseOrders = () => <PlaceholderPage name="Purchase Orders" />;
 const SupplierInvoices = () => <PlaceholderPage name="Supplier Invoices" />;
 const Passports = () => <PlaceholderPage name="Passports" />;
-const PriceListReview = () => <PlaceholderPage name="Price List Review" />;
+const PriceListReview = () => <PriceLists />;
 
 // Finance Section Routes
 const DailyBalance = () => <PlaceholderPage name="Daily Balance" />;
