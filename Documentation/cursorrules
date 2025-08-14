@@ -1,0 +1,170 @@
+# MercuryOne Cursor Development Rules
+# Bespoke context configuration for MercuryOne family business management system
+# Generated on: 2025-08-13
+
+## Project Context & Architecture
+
+### Core System Overview
+- **Project**: MercuryOne - UK furniture retail management system 
+- **Platform**: Desktop web application (React 18 + TypeScript + Express + PostgreSQL)
+- **Integration**: Morpheus mobile app via Google Pub/Sub messaging
+- **Agents**: 14 total (11 MercuryOne including Jupiter + 3 Morpheus exclusive)
+- **Automation**: 85-90% of document-heavy business processes
+- **Suppliers**: Core 5 + Extended 66+ network (71+ total coverage)
+
+### UI Lock Protocol ⚠️ CRITICAL
+- **LOCKED**: Dashboard (homepage) layout, Jupiter Master Controller Panel, agent organization
+- **FLEXIBLE**: Individual business pages can be developed and enhanced
+- **Theme**: Divine theme with exact HSL values enforced by Athena agent (zero tolerance)
+
+## Development Guidelines
+
+### Code Structure & Patterns
+- Follow modern fullstack JavaScript patterns with React 18 frontend
+- Keep business logic in backend, frontend handles presentation only
+- Use TypeScript throughout with strict type safety
+- Database schema first approach using Drizzle ORM with PostgreSQL
+- Minimize file count by collapsing similar components
+
+### Agent-Based Architecture
+- All features must align with 14-agent ecosystem roles and responsibilities
+- Jupiter orchestrates all MercuryOne agents via MCP (Master Control Protocol)
+- Each agent has specific domain responsibilities (see MercuryOne_Agent_Protocol.md)
+- Patches must follow agent assignment protocols from canonical documentation
+
+### Development Workflow
+- **Patch-based development**: Each feature is a numbered patch with documentation
+- **Dashboard UI remains locked** - only enhance individual business pages
+- **Agent integration** follows canonical specifications in Documentation/Architecture/
+- **Documentation updates** required for all architectural changes
+
+### Essential File References (Always Include These)
+
+#### Core Architecture Context
+@Documentation/Architecture/MercuryOne_Agent_Protocol.md - CANONICAL agent communication patterns
+@Documentation/Architecture/MercuryOne_Technical_Architecture.md - Complete system architecture
+@Documentation/Overviews/MercuryOne_System_Overview.md - System overview and business context
+@Documentation/Architecture/MercuryOne_Divine_Theme_Spec.md - UI theme enforcement (locked)
+
+#### Business Logic Context  
+@Documentation/Business_Logic/MercuryOne_Core_Business_Logic.md - Core business workflows
+@Documentation/Suppliers/MercuryOne_Supplier_Architecture_Guide.md - Supplier document processing
+@Documentation/Integrations/Morpheus_Integration_Guide.md - Mobile app integration patterns
+@Documentation/Compliance/MercuryOne_UK_Compliance_Guide.md - GDPR, VAT MTD compliance
+
+#### Project Management Context
+@Documentation/Documentation/MERCURYONE_UI_LOCKED_REPLICATION_PROMPT.md - UI lock protocol
+@replit.md - User preferences and architectural decisions
+
+### UK Business Compliance Requirements
+- **VAT MTD compliance** mandatory for all financial features
+- **GDPR compliance** enforced by Mars and Athena agents
+- **Audit trails** required for all business operations
+- **UK furniture retail workflows** must follow established patterns
+
+### Technical Standards
+
+#### Database & API
+- PostgreSQL with Drizzle ORM for type-safe operations
+- Express backend with thin route handlers
+- Validate request bodies with Zod schemas from drizzle-zod
+- Use storage interface for all CRUD operations
+
+#### Frontend Development
+- React 18 with wouter routing
+- Shadcn UI components with Divine theme HSL values
+- TanStack Query for data fetching with strong typing
+- Forms use react-hook-form with zodResolver validation
+- Add data-testid to all interactive and display elements
+
+#### Styling & Theming ⚠️ CRITICAL
+- Divine theme colors are EXACT HSL values - zero tolerance for drift
+- Glass morphism effects using .glass-card class
+- Dark navy sidebar theme with yellow/gold section headers
+- Agent-specific card colors maintained consistently
+
+## Agent Ecosystem Context
+
+### MercuryOne Agents (11)
+- **Jupiter**: Master controller and orchestrator (shared with Morpheus)
+- **Janus**: Passport lifecycle gatekeeper and audit enforcement  
+- **Juno**: Document schema validation and intake routing
+- **Saturn**: Delay alerting and notification dispatching
+- **Athena**: UI drift detection and GDPR enforcement
+- **Vulcan**: Auto-repair suggestions for lifecycle violations
+- **Hercules**: Patch validation and regression testing
+- **Mars**: Security enforcement (CSRF/OAuth/session)
+- **Neptune**: Xero ledger sync and VAT compliance
+- **Minerva**: Frontend crash detection and telemetry
+- **Apollo**: CI diagnostics and external API validation
+
+### Morpheus Agents (3) 
+- **Iris**: Mobile document intake and scan normalization
+- **Argus**: OCR processing and schema enrichment
+- **Daedalus**: Schema memory and supplier pattern learning
+
+## Common Development Patterns
+
+### When Adding New Features
+1. Reference agent assignment in MercuryOne_Agent_Protocol.md
+2. Check business logic patterns in MercuryOne_Core_Business_Logic.md  
+3. Ensure UK compliance requirements are met
+4. Follow patch development protocol with proper documentation
+5. Preserve dashboard UI lock while enhancing individual pages
+
+### When Debugging Issues
+1. Check agent logs and health monitoring (Jupiter orchestration)
+2. Verify Divine theme compliance (Athena enforcement)
+3. Review business logic flows in core documentation
+4. Ensure proper agent communication patterns
+
+### When Modifying UI
+- **NEVER modify dashboard layout or agent organization**
+- Individual pages can be enhanced with real business functionality
+- Maintain exact Divine theme HSL color specifications
+- Follow glass morphism design patterns with .glass-card
+
+## Data Integrity Requirements
+- Only use authentic data from authorized sources
+- Implement clear error states for failed data retrieval
+- Request API keys/credentials for external service testing
+- Design for real UK furniture business workflows
+
+## Project Structure Context
+```
+client/ - React frontend with TypeScript
+server/ - Express backend with PostgreSQL
+shared/ - Shared schemas and types
+Documentation/ - Comprehensive project documentation
+patches/ - Patch-based development structure
+```
+
+## Memory and Context Management
+- Always update @replit.md for architectural changes and user preferences
+- Reference canonical documentation files for authoritative patterns
+- Maintain consistency with 14-agent ecosystem roles
+- Document patch development with proper technical summaries
+
+---
+
+# Context Gathering Strategy
+
+## For Agent-Related Features
+Always include: @Documentation/Architecture/MercuryOne_Agent_Protocol.md
+
+## For UI/Theme Work  
+Always include: @Documentation/Architecture/MercuryOne_Divine_Theme_Spec.md
+
+## For Business Logic
+Always include: @Documentation/Business_Logic/MercuryOne_Core_Business_Logic.md
+
+## For Integration Work
+Always include: @Documentation/Integrations/Morpheus_Integration_Guide.md
+
+## For Compliance Features
+Always include: @Documentation/Compliance/MercuryOne_UK_Compliance_Guide.md
+
+## For System Architecture
+Always include: @Documentation/Architecture/MercuryOne_Technical_Architecture.md
+
+This configuration optimizes Cursor's context window for MercuryOne's complex multi-agent architecture while maintaining the critical UI lock protocol and UK business compliance requirements.
