@@ -24,36 +24,6 @@ BEGIN
 END
 $$;
 
--- Check if suppliers table exists, if not create it
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'suppliers') THEN
-    -- Create suppliers table
-    CREATE TABLE suppliers (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
-      contact_name TEXT,
-      email TEXT,
-      phone TEXT,
-      address_line_1 TEXT,
-      address_line_2 TEXT,
-      city TEXT,
-      county TEXT,
-      postcode TEXT,
-      country TEXT DEFAULT 'United Kingdom',
-      vat_number TEXT,
-      website TEXT,
-      payment_terms INTEGER DEFAULT 30,
-      minimum_margin DECIMAL(5,2) DEFAULT 30.00,
-      pricing_rule_id INTEGER,
-      active BOOLEAN DEFAULT true NOT NULL,
-      created_at TIMESTAMP DEFAULT NOW() NOT NULL,
-      updated_at TIMESTAMP DEFAULT NOW() NOT NULL
-    );
-  END IF;
-END
-$$;
-
 -- Add code column to suppliers if it doesn't exist
 DO $$
 BEGIN
@@ -70,23 +40,79 @@ $$;
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM suppliers WHERE name = 'G-Plan Furniture') THEN
-    INSERT INTO suppliers (name, code, contact_name, email, minimum_margin)
-    VALUES ('G-Plan Furniture', 'GPLAN', 'John Smith', 'contact@gplan.com', 35.00);
+    INSERT INTO suppliers (
+      name, 
+      code, 
+      contact_person, 
+      contact_email, 
+      phone, 
+      active
+    )
+    VALUES (
+      'G-Plan Furniture', 
+      'GPLAN', 
+      'John Smith', 
+      'contact@gplan.com', 
+      '+44 1234 567890',
+      true
+    );
   END IF;
   
   IF NOT EXISTS (SELECT FROM suppliers WHERE name = 'Parker Knoll') THEN
-    INSERT INTO suppliers (name, code, contact_name, email, minimum_margin)
-    VALUES ('Parker Knoll', 'PARKER', 'Jane Doe', 'sales@parkerknoll.com', 40.00);
+    INSERT INTO suppliers (
+      name, 
+      code, 
+      contact_person, 
+      contact_email, 
+      phone, 
+      active
+    )
+    VALUES (
+      'Parker Knoll', 
+      'PARKER', 
+      'Jane Doe', 
+      'sales@parkerknoll.com', 
+      '+44 2345 678901',
+      true
+    );
   END IF;
   
   IF NOT EXISTS (SELECT FROM suppliers WHERE name = 'Alstons Upholstery') THEN
-    INSERT INTO suppliers (name, code, contact_name, email, minimum_margin)
-    VALUES ('Alstons Upholstery', 'ALSTONS', 'Mike Johnson', 'info@alstons.com', 30.00);
+    INSERT INTO suppliers (
+      name, 
+      code, 
+      contact_person, 
+      contact_email, 
+      phone, 
+      active
+    )
+    VALUES (
+      'Alstons Upholstery', 
+      'ALSTONS', 
+      'Mike Johnson', 
+      'info@alstons.com', 
+      '+44 3456 789012',
+      true
+    );
   END IF;
   
   IF NOT EXISTS (SELECT FROM suppliers WHERE name = 'Ercol Furniture') THEN
-    INSERT INTO suppliers (name, code, contact_name, email, minimum_margin)
-    VALUES ('Ercol Furniture', 'ERCOL', 'Sarah Williams', 'orders@ercol.com', 45.00);
+    INSERT INTO suppliers (
+      name, 
+      code, 
+      contact_person, 
+      contact_email, 
+      phone, 
+      active
+    )
+    VALUES (
+      'Ercol Furniture', 
+      'ERCOL', 
+      'Sarah Williams', 
+      'orders@ercol.com', 
+      '+44 4567 890123',
+      true
+    );
   END IF;
 END
 $$;
