@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Building, User, MapPin, Phone, Mail, CreditCard, Plus, Search, Filter, Pencil, Eye } from "lucide-react";
+import CustomerForm, { CustomerFormData } from "@/components/CustomerForm";
+import CustomerDetails from "@/components/CustomerDetails";
 
 export default function Customers() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +15,7 @@ export default function Customers() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<any>(null);
   const [viewingCustomer, setViewingCustomer] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Mock data for now - will be replaced with API calls
   const customers = [
@@ -60,6 +63,48 @@ export default function Customers() {
     return parts.join(' ') || 'Unnamed Customer';
   };
 
+  const handleCreateCustomer = async (data: CustomerFormData) => {
+    setIsSubmitting(true);
+    try {
+      // In a real implementation, this would be an API call
+      console.log('Creating customer:', data);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsAddDialogOpen(false);
+      // Would refresh customer list here
+    } catch (error) {
+      console.error('Error creating customer:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateCustomer = async (data: CustomerFormData) => {
+    setIsSubmitting(true);
+    try {
+      // In a real implementation, this would be an API call
+      console.log('Updating customer:', editingCustomer.id, data);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setEditingCustomer(null);
+      // Would refresh customer list here
+    } catch (error) {
+      console.error('Error updating customer:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = (data: CustomerFormData) => {
+    if (editingCustomer) {
+      handleUpdateCustomer(data);
+    } else {
+      handleCreateCustomer(data);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -67,10 +112,23 @@ export default function Customers() {
           <h1 className="text-3xl font-bold divine-gradient-text">Customers</h1>
           <p className="text-slate-400">Manage individual and business customer relationships</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Customer
-        </Button>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Customer
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add New Customer</DialogTitle>
+            </DialogHeader>
+            <CustomerForm 
+              onSubmit={handleSubmit}
+              isLoading={isSubmitting}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filters */}
@@ -188,12 +246,14 @@ export default function Customers() {
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => setEditingCustomer(customer)}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
+                        onClick={() => setViewingCustomer(customer)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -205,6 +265,56 @@ export default function Customers() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingCustomer} onOpenChange={(open) => !open && setEditingCustomer(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Customer</DialogTitle>
+          </DialogHeader>
+          {editingCustomer && (
+            <CustomerForm 
+              defaultValues={{
+                type: editingCustomer.type,
+                title: editingCustomer.title || '',
+                firstName: editingCustomer.firstName || '',
+                lastName: editingCustomer.lastName || '',
+                companyName: editingCustomer.companyName || '',
+                email: editingCustomer.email || '',
+                phone: editingCustomer.phone || '',
+                mobile: editingCustomer.mobile || '',
+                addressLine1: editingCustomer.addressLine1 || '',
+                addressLine2: editingCustomer.addressLine2 || '',
+                city: editingCustomer.city || '',
+                county: editingCustomer.county || '',
+                postcode: editingCustomer.postcode || '',
+                country: editingCustomer.country || 'United Kingdom',
+                dateOfBirth: editingCustomer.dateOfBirth || '',
+                notes: editingCustomer.notes || '',
+                creditLimit: parseFloat(editingCustomer.creditLimit) || 0,
+                paymentTerms: editingCustomer.paymentTerms || 30,
+                vatNumber: editingCustomer.vatNumber || '',
+                marketingEmail: editingCustomer.marketingPreferences?.email || false,
+                marketingPhone: editingCustomer.marketingPreferences?.phone || false,
+                marketingPost: editingCustomer.marketingPreferences?.post || false,
+                marketingSMS: editingCustomer.marketingPreferences?.sms || false,
+              }}
+              onSubmit={handleSubmit}
+              isLoading={isSubmitting}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
+      <Dialog open={!!viewingCustomer} onOpenChange={(open) => !open && setViewingCustomer(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Customer Details</DialogTitle>
+          </DialogHeader>
+          {viewingCustomer && <CustomerDetails customer={viewingCustomer} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
