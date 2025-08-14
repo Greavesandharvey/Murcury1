@@ -9,13 +9,13 @@ interface CustomerDetailsProps {
 
 export default function CustomerDetails({ customer }: CustomerDetailsProps) {
   const getCustomerDisplayName = (customer: any) => {
-    if (customer.type === 'business' && customer.companyName) {
-      return customer.companyName;
+    if (customer.type === 'business' && customer.company_name) {
+      return customer.company_name;
     }
     const parts = [];
     if (customer.title) parts.push(customer.title);
-    if (customer.firstName) parts.push(customer.firstName);
-    if (customer.lastName) parts.push(customer.lastName);
+    if (customer.first_name) parts.push(customer.first_name);
+    if (customer.last_name) parts.push(customer.last_name);
     return parts.join(' ') || 'Unnamed Customer';
   };
 
@@ -60,9 +60,9 @@ export default function CustomerDetails({ customer }: CustomerDetailsProps) {
                 <span>{customer.mobile} (Mobile)</span>
               </div>
             )}
-            {customer.vatNumber && (
+            {customer.vat_number && (
               <div>
-                <span className="font-medium">VAT Number:</span> {customer.vatNumber}
+                <span className="font-medium">VAT Number:</span> {customer.vat_number}
               </div>
             )}
           </CardContent>
@@ -77,8 +77,8 @@ export default function CustomerDetails({ customer }: CustomerDetailsProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-1">
-              <div>{customer.addressLine1}</div>
-              {customer.addressLine2 && <div>{customer.addressLine2}</div>}
+              <div>{customer.address_line_1}</div>
+              {customer.address_line_2 && <div>{customer.address_line_2}</div>}
               <div>{customer.city}</div>
               {customer.county && <div>{customer.county}</div>}
               <div className="font-mono">{customer.postcode}</div>
@@ -97,10 +97,10 @@ export default function CustomerDetails({ customer }: CustomerDetailsProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <span className="font-medium">Credit Limit:</span> £{parseFloat(customer.creditLimit || 0).toFixed(2)}
+                <span className="font-medium">Credit Limit:</span> £{parseFloat(customer.credit_limit || 0).toFixed(2)}
               </div>
               <div>
-                <span className="font-medium">Payment Terms:</span> {customer.paymentTerms} days
+                <span className="font-medium">Payment Terms:</span> {customer.payment_terms} days
               </div>
             </CardContent>
           </Card>
@@ -112,14 +112,14 @@ export default function CustomerDetails({ customer }: CustomerDetailsProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {customer.marketingPreferences?.email && <Badge variant="outline">Email</Badge>}
-              {customer.marketingPreferences?.phone && <Badge variant="outline">Phone</Badge>}
-              {customer.marketingPreferences?.post && <Badge variant="outline">Post</Badge>}
-              {customer.marketingPreferences?.sms && <Badge variant="outline">SMS</Badge>}
-              {!customer.marketingPreferences?.email && 
-               !customer.marketingPreferences?.phone && 
-               !customer.marketingPreferences?.post && 
-               !customer.marketingPreferences?.sms && 
+              {customer.marketing_preferences?.email && <Badge variant="outline">Email</Badge>}
+              {customer.marketing_preferences?.phone && <Badge variant="outline">Phone</Badge>}
+              {customer.marketing_preferences?.post && <Badge variant="outline">Post</Badge>}
+              {customer.marketing_preferences?.sms && <Badge variant="outline">SMS</Badge>}
+              {!customer.marketing_preferences?.email && 
+               !customer.marketing_preferences?.phone && 
+               !customer.marketing_preferences?.post && 
+               !customer.marketing_preferences?.sms && 
                 <span className="text-sm text-slate-400">No marketing preferences selected</span>
               }
             </div>
