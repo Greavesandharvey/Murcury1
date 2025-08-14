@@ -2,6 +2,7 @@ import { Switch, Route } from 'wouter';
 import { Layout } from '@/components/Layout';
 import { Dashboard } from '@/pages/Dashboard';
 import { Landing } from '@/pages/Landing';
+import Customers from '@/pages/Customers';
 
 // Placeholder component for routes not yet implemented
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -22,9 +23,6 @@ const POS = () => <PlaceholderPage name="Point of Sale" />;
 
 // Products Page
 const Products = () => <PlaceholderPage name="Products" />;
-
-// Customers Page
-const Customers = () => <PlaceholderPage name="Customers" />;
 
 // Settings Page
 const Settings = () => <PlaceholderPage name="Settings" />;
