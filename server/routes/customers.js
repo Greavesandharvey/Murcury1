@@ -65,10 +65,18 @@ module.exports = function(app, db) {
   // Create new customer
   app.post("/api/customers", async (req, res) => {
     try {
+      console.log("Received request to create customer:", req.body);
       const customerData = req.body;
+      
+      // Check if required fields are present
+      if (!customerData.firstName || !customerData.lastName) {
+        console.error("Missing required fields");
+        return res.status(400).json({ error: "First name and last name are required" });
+      }
       
       // Validate UK postcode
       if (customerData.postcode && !validateUKPostcode(customerData.postcode)) {
+        console.error("Invalid UK postcode:", customerData.postcode);
         return res.status(400).json({ error: "Invalid UK postcode format" });
       }
 
@@ -115,8 +123,11 @@ module.exports = function(app, db) {
         notes: cleanData.notes,
         credit_limit: cleanData.creditLimit || 0,
         payment_terms: cleanData.paymentTerms || 30,
-        vat_number: cleanData.vatNumber
+        vat_number: cleanData.vatNumber,
+        active: true // Ensure active is set to true
       };
+
+      console.log("Processed fields for database:", dbFields);
 
       // Build query
       const fields = Object.keys(dbFields);
@@ -129,11 +140,15 @@ module.exports = function(app, db) {
         RETURNING *
       `;
 
+      console.log("Executing query:", query);
+      console.log("With values:", values);
+
       const result = await db.query(query, values);
+      console.log("Query result:", result.rows[0]);
       res.json(result.rows[0]);
     } catch (error) {
       console.error("Error creating customer:", error);
-      res.status(500).json({ error: "Failed to create customer" });
+      res.status(500).json({ error: "Failed to create customer: " + error.message });
     }
   });
 

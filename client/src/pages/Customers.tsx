@@ -133,20 +133,51 @@ export default function Customers() {
   const handleUpdateCustomer = async (data: CustomerFormData) => {
     setIsSubmitting(true);
     try {
+      console.log('Updating customer with data:', data);
+      
+      // Fix any potential issues with data types
+      const formattedData = {
+        ...data,
+        creditLimit: parseFloat(data.creditLimit?.toString() || '0'),
+        paymentTerms: parseInt(data.paymentTerms?.toString() || '30'),
+      };
+      
+      console.log('Formatted data:', formattedData);
+      
       const response = await fetch(`/api/customers/${editingCustomer.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
 
+      console.log('Response status:', response.status);
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update customer');
+        let errorMessage = 'Failed to update customer';
+        try {
+          if (responseText) {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.error || errorMessage;
+          }
+        } catch (parseError) {
+          console.error('Error parsing error response:', parseError);
+        }
+        throw new Error(errorMessage);
       }
 
-      await response.json();
+      // Only try to parse as JSON if we have content
+      if (responseText) {
+        try {
+          JSON.parse(responseText);
+        } catch (parseError) {
+          console.warn('Response is not valid JSON:', parseError);
+        }
+      }
+      
       setEditingCustomer(null);
       fetchCustomers(); // Refresh the customer list
     } catch (error) {
