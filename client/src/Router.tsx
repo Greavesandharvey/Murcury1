@@ -66,7 +66,6 @@ const AIArea = () => <PlaceholderPage name="AI Area" />;
 const Communications = () => <PlaceholderPage name="Communications" />;
 const Vault = () => <PlaceholderPage name="Vault" />;
 const PatchLog = () => <PlaceholderPage name="Patch Log" />;
-const Profile = () => <PlaceholderPage name="Profile" />; // Temporary placeholder
 
 export function Router() {
   // Skip authentication for testing - direct dashboard
