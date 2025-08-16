@@ -4,6 +4,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { Landing } from '@/pages/Landing';
 import Customers from '@/pages/Customers';
 import PriceLists from '@/pages/PriceLists';
+import Profile from '@/pages/Profile';
 
 // Placeholder component for routes not yet implemented
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -65,6 +66,7 @@ const AIArea = () => <PlaceholderPage name="AI Area" />;
 const Communications = () => <PlaceholderPage name="Communications" />;
 const Vault = () => <PlaceholderPage name="Vault" />;
 const PatchLog = () => <PlaceholderPage name="Patch Log" />;
+const Profile = () => <PlaceholderPage name="Profile" />; // Temporary placeholder
 
 export function Router() {
   // Skip authentication for testing - direct dashboard
@@ -115,6 +117,7 @@ export function Router() {
         <Route path="/communications" component={Communications} />
         <Route path="/vault" component={Vault} />
         <Route path="/patch-log" component={PatchLog} />
+        <Route path="/profile" component={Profile} />
 
         {/* 404 Fallback */}
         <Route>

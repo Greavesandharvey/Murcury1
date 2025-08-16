@@ -114,6 +114,7 @@ export function Layout({ children }: LayoutProps) {
     { name: 'Vault', href: '/vault', icon: Shield },
     { name: 'Patch Log', href: '/patch-log', icon: FileText },
     { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Profile', href: '/profile', icon: User },
   ];
 
   return (

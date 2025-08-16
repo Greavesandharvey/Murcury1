@@ -85,6 +85,9 @@ app.post('/api/price-list-imports', upload.single('file'), (req, res, next) => {
 });
 priceListsRoutes(app, db);
 
+// Profile routes
+require('./routes/profile')(app, db);
+
 // Serve test API HTML file
 app.get('/test-api', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-api.html'));
