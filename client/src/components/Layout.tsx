@@ -33,7 +33,8 @@ import {
   MessageSquare,
   Shield,
   Bell,
-  User
+  User,
+  Server
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -104,6 +105,7 @@ export function Layout({ children }: LayoutProps) {
     { name: 'Document Sync', href: '/document-sync', icon: RefreshCw },
     { name: 'Morpheus Inbox', href: '/morpheus-inbox', icon: Inbox },
     { name: 'Xero Sync Health', href: '/xero-sync-health', icon: BarChart3 },
+    { name: 'Infrastructure', href: '/infrastructure-dashboard', icon: Server },
   ];
 
   const advancedLinks = [

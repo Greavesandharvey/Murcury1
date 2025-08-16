@@ -5,6 +5,7 @@ import { Landing } from '@/pages/Landing';
 import Customers from '@/pages/Customers';
 import PriceLists from '@/pages/PriceLists';
 import Profile from '@/pages/Profile';
+import InfrastructureDashboardComponent from '@/pages/InfrastructureDashboard';
 
 // Placeholder component for routes not yet implemented
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -58,6 +59,7 @@ const MCPDashboard = () => <PlaceholderPage name="MCP Dashboard" />;
 const DocumentSync = () => <PlaceholderPage name="Document Sync" />;
 const MorpheusInbox = () => <PlaceholderPage name="Morpheus Inbox" />;
 const XeroSyncHealth = () => <PlaceholderPage name="Xero Sync Health" />;
+const InfrastructureDashboard = () => <InfrastructureDashboardComponent />; // Use actual component
 
 // Advanced Section Routes
 const Reports = () => <PlaceholderPage name="Reports" />;
@@ -108,6 +110,7 @@ export function Router() {
         <Route path="/document-sync" component={DocumentSync} />
         <Route path="/morpheus-inbox" component={MorpheusInbox} />
         <Route path="/xero-sync-health" component={XeroSyncHealth} />
+        <Route path="/infrastructure-dashboard" component={InfrastructureDashboard} />
 
         {/* Advanced Section Routes */}
         <Route path="/reports" component={Reports} />

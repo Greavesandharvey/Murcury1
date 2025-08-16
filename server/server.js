@@ -88,6 +88,9 @@ priceListsRoutes(app, db);
 // Profile routes
 require('./routes/profile')(app, db);
 
+// Metrics routes for infrastructure dashboard
+require('./routes/metrics')(app, db);
+
 // Serve test API HTML file
 app.get('/test-api', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-api.html'));
