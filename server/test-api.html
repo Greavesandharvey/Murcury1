@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>MercuryOne API Test</h1>
+  
+  <div>
+    <h2>Create Customer</h2>
+    <button id="createCustomer">Create Test Customer</button>
+    <pre id="createResult">Results will appear here...</pre>
+  </div>
+  
+  <div>
+    <h2>Get Customers</h2>
+    <button id="getCustomers">Get All Customers</button>
+    <pre id="getResult">Results will appear here...</pre>
+  </div>
+
+  <script>
+    document.getElementById('createCustomer').addEventListener('click', async () => {
+      const resultElement = document.getElementById('createResult');
+      resultElement.textContent = 'Sending request...';
+      
+      try {
+        const customerData = {
+          type: 'individual',
+          firstName: 'Test',
+          lastName: 'User',
+          email: 'test@example.com',
+          phone: '01234 567890',
+          addressLine1: '123 Test Street',
+          city: 'London',
+          postcode: 'SW1A 1AA'
+        };
+        
+        const response = await fetch('http://localhost:5000/api/customers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(customerData),
+        });
+        
+        const responseText = await response.text();
+        
+        resultElement.textContent = `Status: ${response.status}\n\nResponse:\n${responseText}`;
+        
+        try {
+          const data = JSON.parse(responseText);
+          console.log('Created customer:', data);
+        } catch (e) {
+          console.error('Error parsing response:', e);
+        }
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        console.error('Error:', error);
+      }
+    });
+
+    document.getElementById('getCustomers').addEventListener('click', async () => {
+      const resultElement = document.getElementById('getResult');
+      resultElement.textContent = 'Sending request...';
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/customers');
+        const data = await response.json();
+        
+        resultElement.textContent = `Status: ${response.status}\n\nFound ${data.length} customers:\n${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

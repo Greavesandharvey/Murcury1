@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Upload, 
@@ -19,9 +18,9 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  Calculator,
-  Filter
+  Calculator
 } from "lucide-react";
+import { useDropzone } from "react-dropzone";
 
 const SUPPLIER_FORMATS = {
   'gplan': 'G-Plan Furniture',
@@ -35,57 +34,62 @@ export default function PriceLists() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [viewingImport, setViewingImport] = useState<any>(null);
-
-  // Mock data for now - will be replaced with API calls
-  const imports = [
-    {
-      id: 1,
-      supplierId: 1,
-      supplierName: 'G-Plan Furniture',
-      fileName: 'gplan_prices_july2025.csv',
-      importDate: '2025-07-15T10:30:00',
-      status: 'review',
-      totalRows: 245,
-      validRows: 240,
-      errorRows: 5,
-      reviewDate: null,
-      appliedDate: null
-    },
-    {
-      id: 2,
-      supplierId: 2,
-      supplierName: 'Parker Knoll',
-      fileName: 'pk_wholesale_q3.csv',
-      importDate: '2025-07-10T14:15:00',
-      status: 'applied',
-      totalRows: 182,
-      validRows: 180,
-      errorRows: 2,
-      reviewDate: '2025-07-11T09:20:00',
-      appliedDate: '2025-07-11T09:25:00'
-    },
-    {
-      id: 3,
-      supplierId: 3,
-      supplierName: 'Alstons Upholstery',
-      fileName: 'alstons_august_update.csv',
-      importDate: '2025-07-05T11:45:00',
-      status: 'processing',
-      totalRows: 310,
-      validRows: 150,
-      errorRows: 0,
-      reviewDate: null,
-      appliedDate: null
-    }
-  ];
-
-  // Mock data for suppliers
-  const suppliers = [
+  const [imports, setImports] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([
     { id: 1, name: 'G-Plan Furniture' },
     { id: 2, name: 'Parker Knoll' },
     { id: 3, name: 'Alstons Upholstery' },
     { id: 4, name: 'Duresta Upholstery' }
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Mock data for demonstration
+  const mockImports = [
+    {
+      id: 1,
+      supplierName: 'G-Plan Furniture',
+      fileName: 'gplan_prices_2023.csv',
+      importDate: '2023-08-15T10:30:00',
+      status: 'review',
+      totalRows: 150,
+      validRows: 145,
+      errorRows: 5
+    },
+    {
+      id: 2,
+      supplierName: 'Parker Knoll',
+      fileName: 'parker_knoll_q3_2023.csv',
+      importDate: '2023-07-22T14:15:00',
+      status: 'applied',
+      totalRows: 220,
+      validRows: 218,
+      errorRows: 2
+    },
+    {
+      id: 3,
+      supplierName: 'Alstons Upholstery',
+      fileName: 'alstons_price_update.csv',
+      importDate: '2023-08-01T09:45:00',
+      status: 'processing',
+      totalRows: 180,
+      validRows: 120,
+      errorRows: 0
+    }
   ];
+
+  // Mock function to simulate API call
+  const fetchImports = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setImports(mockImports);
+      setIsLoading(false);
+    }, 500);
+  };
+
+  // Load imports on component mount
+  React.useEffect(() => {
+    fetchImports();
+  }, []);
 
   return (
     <div className="p-6 space-y-6">
@@ -109,7 +113,7 @@ export default function PriceLists() {
               suppliers={suppliers}
               onSuccess={() => {
                 setIsUploadDialogOpen(false);
-                // In a real app, we would refresh the data here
+                fetchImports();
               }}
             />
           </DialogContent>
@@ -156,7 +160,6 @@ export default function PriceLists() {
                 setSelectedStatus("all");
               }}
             >
-              <Filter className="w-4 h-4 mr-2" />
               Clear Filters
             </Button>
           </div>
@@ -222,58 +225,69 @@ export default function PriceLists() {
           <CardTitle>Price List Imports</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Supplier</TableHead>
-                <TableHead>File</TableHead>
-                <TableHead>Import Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Rows</TableHead>
-                <TableHead>Valid/Errors</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {imports?.map((importRecord: any) => (
-                <TableRow key={importRecord.id}>
-                  <TableCell>{importRecord.supplierName}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      <span className="truncate max-w-[200px]">{importRecord.fileName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{new Date(importRecord.importDate).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <ImportStatusBadge status={importRecord.status} />
-                  </TableCell>
-                  <TableCell>{importRecord.totalRows}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="text-green-600">{importRecord.validRows}</span>
-                      <span>/</span>
-                      <span className="text-red-600">{importRecord.errorRows}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setViewingImport(importRecord)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      {importRecord.status === 'review' && (
-                        <ReviewButtons importRecord={importRecord} />
-                      )}
-                    </div>
-                  </TableCell>
+          {isLoading ? (
+            <div className="text-center py-8">Loading price list imports...</div>
+          ) : imports.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-slate-400">No price list imports found</p>
+              <Button className="mt-4" onClick={() => setIsUploadDialogOpen(true)}>
+                Import Your First Price List
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Supplier</TableHead>
+                  <TableHead>File</TableHead>
+                  <TableHead>Import Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Rows</TableHead>
+                  <TableHead>Valid/Errors</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {imports?.map((importRecord: any) => (
+                  <TableRow key={importRecord.id}>
+                    <TableCell>{importRecord.supplierName}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        <span className="truncate max-w-[200px]">{importRecord.fileName}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{new Date(importRecord.importDate).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <ImportStatusBadge status={importRecord.status} />
+                    </TableCell>
+                    <TableCell>{importRecord.totalRows}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-600">{importRecord.validRows}</span>
+                        <span>/</span>
+                        <span className="text-red-600">{importRecord.errorRows}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setViewingImport(importRecord)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {importRecord.status === 'review' && (
+                          <ReviewButtons importRecord={importRecord} onAction={fetchImports} />
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -292,20 +306,20 @@ export default function PriceLists() {
 
 // Import Status Badge Component
 function ImportStatusBadge({ status }: { status: string }) {
-  const statusConfig: Record<string, { color: string, icon: React.ElementType }> = {
-    pending: { color: 'bg-slate-700 text-slate-100', icon: Minus },
-    processing: { color: 'bg-blue-700 text-blue-100', icon: Upload },
-    review: { color: 'bg-yellow-700 text-yellow-100', icon: AlertTriangle },
-    approved: { color: 'bg-green-700 text-green-100', icon: Check },
-    applied: { color: 'bg-green-700 text-green-100', icon: Check },
-    rejected: { color: 'bg-red-700 text-red-100', icon: X },
+  const statusConfig: any = {
+    pending: { color: 'bg-gray-100 text-gray-800', icon: Minus },
+    processing: { color: 'bg-blue-100 text-blue-800', icon: Upload },
+    review: { color: 'bg-yellow-100 text-yellow-800', icon: AlertTriangle },
+    approved: { color: 'bg-green-100 text-green-800', icon: Check },
+    applied: { color: 'bg-green-100 text-green-800', icon: Check },
+    rejected: { color: 'bg-red-100 text-red-800', icon: X },
   };
 
   const config = statusConfig[status] || statusConfig.pending;
   const Icon = config.icon;
 
   return (
-    <Badge className={config.color}>
+    <Badge variant="outline" className={config.color}>
       <Icon className="w-3 h-3 mr-1" />
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </Badge>
@@ -318,24 +332,36 @@ function PriceListUpload({ suppliers, onSuccess }: { suppliers: any[]; onSuccess
   const [selectedFormat, setSelectedFormat] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile && selectedFile.type === 'text/csv') {
-      setFile(selectedFile);
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file && file.type === 'text/csv') {
+      setFile(file);
+      setError(null);
     } else {
-      alert("Please select a valid CSV file");
+      setError("Please upload a CSV file");
     }
-  };
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'text/csv': ['.csv']
+    },
+    multiple: false
+  });
 
   const handleUpload = async () => {
     if (!file || !selectedSupplier || !selectedFormat) {
-      alert("Please select supplier, format and file");
+      setError("Please select supplier, format and file");
       return;
     }
 
     setIsUploading(true);
-    // Simulate upload
+    setError(null);
+    
+    // Simulate API call
     setTimeout(() => {
       setIsUploading(false);
       onSuccess();
@@ -344,6 +370,12 @@ function PriceListUpload({ suppliers, onSuccess }: { suppliers: any[]; onSuccess
 
   return (
     <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">Supplier</label>
@@ -380,31 +412,30 @@ function PriceListUpload({ suppliers, onSuccess }: { suppliers: any[]; onSuccess
 
       <div>
         <label className="block text-sm font-medium mb-2">CSV File</label>
-        <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors border-slate-700 hover:border-slate-500">
-          <input 
-            type="file" 
-            accept=".csv" 
-            onChange={handleFileChange} 
-            className="hidden" 
-            id="csv-upload" 
-          />
-          <label htmlFor="csv-upload" className="cursor-pointer">
-            <Upload className="mx-auto h-12 w-12 text-slate-500 mb-4" />
-            {file ? (
-              <p className="text-sm text-slate-400">
-                Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+            isDragActive 
+              ? 'border-primary bg-primary/5' 
+              : 'border-gray-300 hover:border-gray-400'
+          }`}
+        >
+          <input {...getInputProps()} />
+          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          {file ? (
+            <p className="text-sm text-gray-600">
+              Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+            </p>
+          ) : (
+            <div>
+              <p className="text-sm text-gray-600">
+                Drag and drop a CSV file here, or click to select
               </p>
-            ) : (
-              <div>
-                <p className="text-sm text-slate-400">
-                  Drag and drop a CSV file here, or click to select
-                </p>
-                <p className="text-xs text-slate-500 mt-2">
-                  Maximum file size: 10MB
-                </p>
-              </div>
-            )}
-          </label>
+              <p className="text-xs text-gray-500 mt-2">
+                Maximum file size: 10MB
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -424,27 +455,24 @@ function PriceListUpload({ suppliers, onSuccess }: { suppliers: any[]; onSuccess
 }
 
 // Review Buttons Component
-function ReviewButtons({ importRecord }: { importRecord: any }) {
-  const [isApproving, setIsApproving] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
-
+function ReviewButtons({ importRecord, onAction }: { importRecord: any; onAction: () => void }) {
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   const handleApprove = () => {
-    setIsApproving(true);
+    setIsProcessing(true);
     // Simulate API call
     setTimeout(() => {
-      setIsApproving(false);
-      alert("Price list approved");
-      // In a real app, we would refresh the data here
+      setIsProcessing(false);
+      onAction();
     }, 1000);
   };
-
+  
   const handleReject = () => {
-    setIsRejecting(true);
+    setIsProcessing(true);
     // Simulate API call
     setTimeout(() => {
-      setIsRejecting(false);
-      alert("Price list rejected");
-      // In a real app, we would refresh the data here
+      setIsProcessing(false);
+      onAction();
     }, 1000);
   };
 
@@ -455,7 +483,7 @@ function ReviewButtons({ importRecord }: { importRecord: any }) {
         variant="default"
         className="bg-green-600 hover:bg-green-700"
         onClick={handleApprove}
-        disabled={isApproving}
+        disabled={isProcessing}
       >
         <Check className="w-4 h-4" />
       </Button>
@@ -463,7 +491,7 @@ function ReviewButtons({ importRecord }: { importRecord: any }) {
         size="sm"
         variant="destructive"
         onClick={handleReject}
-        disabled={isRejecting}
+        disabled={isProcessing}
       >
         <X className="w-4 h-4" />
       </Button>
@@ -477,46 +505,46 @@ function ImportDetails({ importRecord }: { importRecord: any }) {
   const items = [
     {
       id: 1,
-      model: 'Valencia',
+      model: 'Washington',
       type: 'Sofa',
-      material: 'Leather',
-      supplierSku: 'VAL-S-L',
-      currentCostPrice: 450.00,
-      newCostPrice: 475.00,
-      marginPercent: 25.5,
+      material: 'Fabric',
+      supplierSku: 'GP-WAS-3S-FAB',
+      currentCostPrice: 500.00,
+      newCostPrice: 550.00,
       matchConfidence: 100,
       matchMethod: 'exact_sku',
+      marginPercent: 45.5,
       status: 'matched'
     },
     {
       id: 2,
-      model: 'Madrid',
-      type: 'Armchair',
-      material: 'Fabric',
-      supplierSku: 'MAD-A-F',
-      currentCostPrice: 280.00,
-      newCostPrice: 290.00,
-      marginPercent: 22.0,
+      model: 'Milton',
+      type: 'Chair',
+      material: 'Leather',
+      supplierSku: 'GP-MIL-CH-LTH',
+      currentCostPrice: 350.00,
+      newCostPrice: 375.00,
       matchConfidence: 90,
       matchMethod: 'model_type_material',
+      marginPercent: 53.3,
       status: 'matched'
     },
     {
       id: 3,
-      model: 'Oslo',
+      model: 'Newbury',
       type: 'Footstool',
       material: 'Fabric',
-      supplierSku: 'OSL-F-F',
-      currentCostPrice: 120.00,
-      newCostPrice: 130.00,
-      marginPercent: 18.5,
-      matchConfidence: 70,
-      matchMethod: 'fuzzy_description',
-      status: 'matched'
+      supplierSku: 'GP-NEW-FS-FAB',
+      currentCostPrice: null,
+      newCostPrice: 125.00,
+      matchConfidence: 0,
+      matchMethod: 'none',
+      marginPercent: 0,
+      status: 'unmatched'
     }
   ];
 
-  const calculatePriceChange = (current: number, newPrice: number) => {
+  const calculatePriceChange = (current: number | null, newPrice: number) => {
     if (!current || current === 0) return { amount: 0, percent: 0, direction: 'same' };
     
     const amount = newPrice - current;
@@ -566,11 +594,13 @@ function ImportDetails({ importRecord }: { importRecord: any }) {
             <CardTitle className="text-sm">Progress</CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress 
-              value={(importRecord.validRows / importRecord.totalRows) * 100} 
-              className="h-2"
-            />
-            <p className="text-xs text-slate-400 mt-1">
+            <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-green-500 rounded-full"
+                style={{ width: `${(importRecord.validRows / importRecord.totalRows) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
               {Math.round((importRecord.validRows / importRecord.totalRows) * 100)}% processed
             </p>
           </CardContent>
@@ -596,7 +626,7 @@ function ImportDetails({ importRecord }: { importRecord: any }) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((item: any) => {
+              {items.map((item) => {
                 const priceChange = calculatePriceChange(item.currentCostPrice, item.newCostPrice);
                 const margin = item.marginPercent || 0;
                 
@@ -607,7 +637,7 @@ function ImportDetails({ importRecord }: { importRecord: any }) {
                         <div className="font-medium">
                           {item.model} {item.type}
                         </div>
-                        <div className="text-sm text-slate-400">
+                        <div className="text-sm text-muted-foreground">
                           {item.material} | {item.supplierSku}
                         </div>
                       </div>
@@ -620,7 +650,7 @@ function ImportDetails({ importRecord }: { importRecord: any }) {
                         >
                           {item.matchConfidence}%
                         </Badge>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-muted-foreground">
                           {item.matchMethod}
                         </span>
                       </div>
@@ -631,13 +661,13 @@ function ImportDetails({ importRecord }: { importRecord: any }) {
                       <div className="flex items-center gap-1">
                         {priceChange.direction === 'up' && <TrendingUp className="w-4 h-4 text-red-500" />}
                         {priceChange.direction === 'down' && <TrendingDown className="w-4 h-4 text-green-500" />}
-                        {priceChange.direction === 'same' && <Minus className="w-4 h-4 text-slate-400" />}
+                        {priceChange.direction === 'same' && <Minus className="w-4 h-4 text-gray-400" />}
                         <span className={
                           priceChange.direction === 'up' ? 'text-red-600' : 
                           priceChange.direction === 'down' ? 'text-green-600' : 
-                          'text-slate-400'
+                          'text-gray-600'
                         }>
-                          {priceChange.percent.toFixed(1)}%
+                          {Math.abs(priceChange.percent).toFixed(1)}%
                         </span>
                       </div>
                     </TableCell>

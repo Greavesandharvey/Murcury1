@@ -114,8 +114,7 @@ const SUPPLIER_FORMATS = {
       'Selling Price': 'sellingPrice'
     },
     skipRows: 1,
-    requiredColumns: ['Material', 'Model', 'Type', 'Cost Price'],
-    delimiter: ','
+    requiredColumns: ['Material', 'Model', 'Type', 'Cost Price']
   },
   'parker-knoll': {
     supplier: 'Parker Knoll',
@@ -126,8 +125,7 @@ const SUPPLIER_FORMATS = {
       'RRP': 'sellingPrice'
     },
     skipRows: 2,
-    requiredColumns: ['Product Code', 'Trade Price'],
-    delimiter: ','
+    requiredColumns: ['Product Code', 'Trade Price']
   },
   'alstons': {
     supplier: 'Alstons Upholstery',
@@ -140,22 +138,7 @@ const SUPPLIER_FORMATS = {
       'Retail Price': 'sellingPrice'
     },
     skipRows: 0,
-    requiredColumns: ['Code', 'Net Price'],
-    delimiter: ','
-  },
-  'ercol': {
-    supplier: 'Ercol Furniture',
-    columns: {
-      'SKU': 'supplierSku',
-      'Description': 'description',
-      'Collection': 'model',
-      'Material': 'material',
-      'Wholesale': 'costPrice',
-      'Retail': 'sellingPrice'
-    },
-    skipRows: 1,
-    requiredColumns: ['SKU', 'Wholesale'],
-    delimiter: ';'  // Some suppliers use semicolon as delimiter
+    requiredColumns: ['Code', 'Net Price']
   }
 };
 
@@ -166,42 +149,20 @@ class CSVProcessor {
       throw new Error(`Unknown supplier format: ${formatKey}`);
     }
 
-    // Detect line endings (CRLF or LF)
-    const lineEnding = csvText.includes('\r\n') ? '\r\n' : '\n';
-    const lines = csvText.split(lineEnding);
-    
-    if (lines.length <= format.skipRows) {
-      throw new Error('CSV file has insufficient rows');
-    }
-    
-    // Parse header row
-    const headerRow = lines[format.skipRows];
-    const delimiter = format.delimiter || this.detectDelimiter(headerRow);
-    const headers = this.parseCSVRow(headerRow, delimiter);
-    
-    // Validate headers against expected format
-    const missingHeaders = format.requiredColumns.filter(col => !headers.includes(col));
-    if (missingHeaders.length > 0) {
-      throw new Error(`Missing required headers: ${missingHeaders.join(', ')}`);
-    }
+    const lines = csvText.split('\n');
+    const headers = lines[format.skipRows || 0].split(',').map(h => h.trim());
     
     const items = [];
     const errors = [];
     let validRows = 0;
     let errorRows = 0;
 
-    for (let i = format.skipRows + 1; i < lines.length; i++) {
+    for (let i = (format.skipRows || 0) + 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
 
       try {
-        const values = this.parseCSVRow(line, delimiter);
-        
-        // Skip if we have fewer values than headers (likely an empty or malformed row)
-        if (values.length < headers.length / 2) {
-          continue;
-        }
-        
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
         const item = this.parseRow(values, headers, format, i + 1);
         
         // Validate required fields
@@ -228,70 +189,11 @@ class CSVProcessor {
       items,
       errors,
       summary: {
-        totalRows: lines.length - format.skipRows - 1,
+        totalRows: lines.length - (format.skipRows || 0) - 1,
         validRows,
-        errorRows,
-        format: formatKey,
-        supplier: format.supplier
+        errorRows
       }
     };
-  }
-  
-  static detectDelimiter(headerLine) {
-    // Count occurrences of potential delimiters
-    const counts = {
-      ',': (headerLine.match(/,/g) || []).length,
-      ';': (headerLine.match(/;/g) || []).length,
-      '\t': (headerLine.match(/\t/g) || []).length,
-      '|': (headerLine.match(/\|/g) || []).length
-    };
-    
-    // Find the delimiter with the most occurrences
-    let maxCount = 0;
-    let detectedDelimiter = ','; // Default
-    
-    for (const [delimiter, count] of Object.entries(counts)) {
-      if (count > maxCount) {
-        maxCount = count;
-        detectedDelimiter = delimiter;
-      }
-    }
-    
-    return detectedDelimiter;
-  }
-  
-  static parseCSVRow(line, delimiter) {
-    const result = [];
-    let inQuotes = false;
-    let currentValue = '';
-    
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
-      
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          // Double quotes inside quotes - add a single quote
-          currentValue += '"';
-          i++;
-        } else {
-          // Toggle quotes mode
-          inQuotes = !inQuotes;
-        }
-      } else if (char === delimiter && !inQuotes) {
-        // End of field
-        result.push(currentValue.trim());
-        currentValue = '';
-      } else {
-        // Regular character
-        currentValue += char;
-      }
-    }
-    
-    // Add the last value
-    result.push(currentValue.trim());
-    
-    return result;
   }
 
   static parseRow(values, headers, format, rowNumber) {
@@ -299,15 +201,13 @@ class CSVProcessor {
     
     headers.forEach((header, index) => {
       const mappedField = format.columns[header];
-      if (mappedField && index < values.length) {
+      if (mappedField && values[index]) {
         let value = values[index];
         
         // Parse price fields
         if (mappedField.includes('Price') || mappedField === 'costPrice' || mappedField === 'sellingPrice') {
-          // Handle various price formats (£123.45, $123.45, 123,45 €, etc.)
-          value = value.replace(/[£$€]/g, '').replace(/,/g, '.').trim();
-          const parsedValue = parseFloat(value);
-          item[mappedField] = isNaN(parsedValue) ? 0 : parsedValue;
+          value = value.replace(/[£$,]/g, '');
+          item[mappedField] = parseFloat(value) || 0;
         } else {
           item[mappedField] = value;
         }
@@ -329,72 +229,18 @@ class CSVProcessor {
     });
 
     // Validate price fields
-    if (item.costPrice !== undefined) {
-      if (isNaN(item.costPrice) || item.costPrice <= 0 || item.costPrice > 100000) {
-        errors.push(`Invalid cost price: ${item.costPrice}`);
-      }
+    if (item.costPrice && (item.costPrice <= 0 || item.costPrice > 100000)) {
+      errors.push('Invalid cost price');
     }
 
-    if (item.sellingPrice !== undefined) {
-      if (isNaN(item.sellingPrice) || item.sellingPrice <= 0 || item.sellingPrice > 100000) {
-        errors.push(`Invalid selling price: ${item.sellingPrice}`);
-      }
-    }
-
-    // Additional validations for specific fields
-    if (item.supplierSku && item.supplierSku.length > 50) {
-      errors.push('Supplier SKU exceeds maximum length (50 characters)');
+    if (item.sellingPrice && (item.sellingPrice <= 0 || item.sellingPrice > 100000)) {
+      errors.push('Invalid selling price');
     }
 
     return {
       isValid: errors.length === 0,
       errors
     };
-  }
-  
-  static analyzeData(items) {
-    // Calculate statistics for the imported data
-    const stats = {
-      totalItems: items.length,
-      averageCostPrice: 0,
-      minCostPrice: Infinity,
-      maxCostPrice: 0,
-      itemsWithoutSellingPrice: 0,
-      matchedItems: 0,
-      unmatchedItems: 0
-    };
-    
-    let totalCostPrice = 0;
-    
-    items.forEach(item => {
-      // Cost price stats
-      if (item.costPrice) {
-        totalCostPrice += item.costPrice;
-        stats.minCostPrice = Math.min(stats.minCostPrice, item.costPrice);
-        stats.maxCostPrice = Math.max(stats.maxCostPrice, item.costPrice);
-      }
-      
-      // Selling price stats
-      if (!item.sellingPrice) {
-        stats.itemsWithoutSellingPrice++;
-      }
-      
-      // Matching stats
-      if (item.matchedProductId) {
-        stats.matchedItems++;
-      } else {
-        stats.unmatchedItems++;
-      }
-    });
-    
-    stats.averageCostPrice = items.length > 0 ? totalCostPrice / items.length : 0;
-    
-    // Fix min price if no items found
-    if (stats.minCostPrice === Infinity) {
-      stats.minCostPrice = 0;
-    }
-    
-    return stats;
   }
 }
 
@@ -554,118 +400,53 @@ async function processCSVFile(importId, filePath, format, supplierId, db) {
     // Process CSV file
     const fs = require('fs').promises;
     const csvData = await fs.readFile(filePath, 'utf-8');
-    
-    // Log the start of processing
-    console.log(`Processing CSV file for import #${importId}, supplier ID: ${supplierId}, format: ${format}`);
-    
-    // Process the CSV data
     const { items, errors, summary } = await CSVProcessor.processPriceList(csvData, supplierId, format);
-    
-    // Log processing results
-    console.log(`Processed ${summary.totalRows} rows: ${summary.validRows} valid, ${summary.errorRows} with errors`);
-    
-    // Store processing errors in the database if any
-    if (errors.length > 0) {
-      const errorNotes = errors.slice(0, 10).join('\n') + 
-        (errors.length > 10 ? `\n... and ${errors.length - 10} more errors` : '');
-      
-      await db.query(
-        "UPDATE price_list_imports SET notes = $1 WHERE id = $2",
-        [errorNotes, importId]
-      );
-    }
 
     // Insert price list items
     if (items.length > 0) {
-      console.log(`Starting product matching for ${items.length} items`);
-      
-      // Process items in batches to avoid memory issues with large files
-      const BATCH_SIZE = 100;
-      for (let i = 0; i < items.length; i += BATCH_SIZE) {
-        const batch = items.slice(i, i + BATCH_SIZE);
-        console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1} of ${Math.ceil(items.length / BATCH_SIZE)}`);
-        
-        const itemsWithMatching = await Promise.all(
-          batch.map(async (item) => {
-            const match = await ProductMatcher.findMatches(item, supplierId, db);
-            
-            // Calculate margin if we have both prices
-            let marginPercent = 0;
-            if (match.product && match.product.selling_price && item.costPrice) {
-              marginPercent = PricingCalculator.calculateMargin(
-                item.costPrice, 
-                match.product.selling_price
-              );
-            }
-            
-            // Calculate suggested selling price based on default margin
-            const defaultMargin = 40; // 40% default margin
-            const suggestedPrice = PricingCalculator.calculateSuggestedPrice(
-              item.costPrice,
-              defaultMargin
-            );
-            
-            return {
-              ...item,
-              importId,
-              matchedProductId: match.product?.id,
-              matchConfidence: match.confidence,
-              matchMethod: match.method,
-              currentCostPrice: match.product?.cost_price,
-              currentSellingPrice: match.product?.selling_price,
-              marginPercent,
-              suggestedSellingPrice: suggestedPrice
-            };
-          })
-        );
+      const itemsWithMatching = await Promise.all(
+        items.map(async (item) => {
+          const match = await ProductMatcher.findMatches(item, supplierId, db);
+          return {
+            ...item,
+            importId,
+            matchedProductId: match.product?.id,
+            matchConfidence: match.confidence,
+            matchMethod: match.method,
+            currentCostPrice: match.product?.cost_price,
+            currentSellingPrice: match.product?.selling_price,
+            marginPercent: match.product ? 
+              PricingCalculator.calculateMargin(item.costPrice, match.product.selling_price) : 0
+          };
+        })
+      );
 
-        // Insert items into database
-        for (const item of itemsWithMatching) {
-          await db.query(
-            `INSERT INTO price_list_items (
-              import_id, row_number, supplier_id, supplier_sku, model, type, material, 
-              description, current_cost_price, new_cost_price, current_selling_price, 
-              suggested_selling_price, margin_percent, matched_product_id, 
-              match_confidence, match_method, status
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
-            [
-              importId, item.rowNumber, supplierId, item.supplierSku, item.model, 
-              item.type, item.material, item.description, item.currentCostPrice, 
-              item.costPrice, item.currentSellingPrice, item.suggestedSellingPrice,
-              item.marginPercent, item.matchedProductId, item.matchConfidence, 
-              item.matchMethod, item.matchedProductId ? 'matched' : 'unmatched'
-            ]
-          );
-        }
+      // Insert items into database
+      for (const item of itemsWithMatching) {
+        await db.query(
+          `INSERT INTO price_list_items (
+            import_id, row_number, supplier_id, supplier_sku, model, type, material, 
+            description, current_cost_price, new_cost_price, current_selling_price, 
+            margin_percent, matched_product_id, match_confidence, match_method, status
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+          [
+            importId, item.rowNumber, supplierId, item.supplierSku, item.model, 
+            item.type, item.material, item.description, item.currentCostPrice, 
+            item.costPrice, item.currentSellingPrice, item.marginPercent, 
+            item.matchedProductId, item.matchConfidence, item.matchMethod, 
+            item.matchedProductId ? 'matched' : 'unmatched'
+          ]
+        );
       }
     }
-    
-    // Calculate statistics for the imported data
-    const stats = CSVProcessor.analyzeData(items);
-    
-    // Update import record with stats and status
+
+    // Update import record
     await db.query(
       `UPDATE price_list_imports 
-       SET status = 'review', 
-           total_rows = $1, 
-           valid_rows = $2, 
-           error_rows = $3,
-           matched_items = $4,
-           unmatched_items = $5,
-           avg_cost_price = $6
-       WHERE id = $7`,
-      [
-        summary.totalRows, 
-        summary.validRows, 
-        summary.errorRows, 
-        stats.matchedItems,
-        stats.unmatchedItems,
-        stats.averageCostPrice,
-        importId
-      ]
+       SET status = 'review', total_rows = $1, valid_rows = $2, error_rows = $3 
+       WHERE id = $4`,
+      [summary.totalRows, summary.validRows, summary.errorRows, importId]
     );
-    
-    console.log(`CSV processing completed for import #${importId}`);
 
   } catch (error) {
     console.error("Error processing CSV:", error);
@@ -679,38 +460,6 @@ async function processCSVFile(importId, filePath, format, supplierId, db) {
 
 async function applyPriceChanges(importId, db) {
   try {
-    console.log(`Starting price change application for import #${importId}`);
-    
-    // Get import details to determine pricing rules
-    const importResult = await db.query(
-      `SELECT pli.*, s.pricing_rule_id, s.minimum_margin 
-       FROM price_list_imports pli
-       JOIN suppliers s ON pli.supplier_id = s.id
-       WHERE pli.id = $1`,
-      [importId]
-    );
-    
-    if (importResult.rows.length === 0) {
-      throw new Error(`Import #${importId} not found`);
-    }
-    
-    const importDetails = importResult.rows[0];
-    const supplierId = importDetails.supplier_id;
-    const pricingRuleId = importDetails.pricing_rule_id;
-    const minimumMargin = importDetails.minimum_margin || 30; // Default 30% if not specified
-    
-    // Get pricing rule if available
-    let pricingRule = null;
-    if (pricingRuleId) {
-      const ruleResult = await db.query(
-        "SELECT * FROM pricing_rules WHERE id = $1",
-        [pricingRuleId]
-      );
-      if (ruleResult.rows.length > 0) {
-        pricingRule = ruleResult.rows[0];
-      }
-    }
-    
     // Get approved price list items
     const itemsResult = await db.query(
       `SELECT * FROM price_list_items 
@@ -719,16 +468,6 @@ async function applyPriceChanges(importId, db) {
     );
 
     const items = itemsResult.rows;
-    console.log(`Found ${items.length} matched items to apply`);
-    
-    // Track statistics
-    const stats = {
-      totalItems: items.length,
-      costPriceUpdates: 0,
-      sellingPriceUpdates: 0,
-      noChanges: 0,
-      belowMinimumMargin: 0
-    };
 
     // Apply price changes
     for (const item of items) {
@@ -739,61 +478,12 @@ async function applyPriceChanges(importId, db) {
 
       if (productResult.rows.length > 0) {
         const oldProduct = productResult.rows[0];
-        let newCostPrice = parseFloat(item.new_cost_price);
-        let newSellingPrice = parseFloat(oldProduct.selling_price);
-        let priceChangeType = 'cost_price';
-        let updateSellingPrice = false;
-        
-        // Skip if cost price hasn't changed
-        if (Math.abs(newCostPrice - oldProduct.cost_price) < 0.01) {
-          stats.noChanges++;
-          continue;
-        }
-        
-        // Calculate current margin
-        const currentMargin = PricingCalculator.calculateMargin(
-          newCostPrice, 
-          newSellingPrice
-        );
-        
-        // Check if current margin is below minimum
-        if (currentMargin < minimumMargin) {
-          stats.belowMinimumMargin++;
-          
-          // Apply pricing rule if available
-          if (pricingRule) {
-            newSellingPrice = PricingCalculator.applyPricingRule(
-              newCostPrice, 
-              pricingRule
-            );
-            updateSellingPrice = true;
-            priceChangeType = 'both_prices';
-          } else {
-            // Use default margin if no rule
-            newSellingPrice = PricingCalculator.calculateSuggestedPrice(
-              newCostPrice,
-              minimumMargin
-            );
-            updateSellingPrice = true;
-            priceChangeType = 'both_prices';
-          }
-        }
         
         // Update product prices
-        if (updateSellingPrice) {
-          await db.query(
-            "UPDATE products SET cost_price = $1, selling_price = $2, updated_at = NOW() WHERE id = $3",
-            [newCostPrice, newSellingPrice, item.matched_product_id]
-          );
-          stats.costPriceUpdates++;
-          stats.sellingPriceUpdates++;
-        } else {
-          await db.query(
-            "UPDATE products SET cost_price = $1, updated_at = NOW() WHERE id = $2",
-            [newCostPrice, item.matched_product_id]
-          );
-          stats.costPriceUpdates++;
-        }
+        await db.query(
+          "UPDATE products SET cost_price = $1, updated_at = NOW() WHERE id = $2",
+          [item.new_cost_price, item.matched_product_id]
+        );
 
         // Record price change history
         await db.query(
@@ -802,51 +492,22 @@ async function applyPriceChanges(importId, db) {
             old_selling_price, new_selling_price, reason, changed_by
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [
-            item.matched_product_id, 
-            importId, 
-            priceChangeType, 
-            oldProduct.cost_price, 
-            newCostPrice,
-            oldProduct.selling_price, 
-            newSellingPrice, 
-            updateSellingPrice ? 'margin_adjustment' : 'supplier_update', 
-            importDetails.reviewed_by || 1 // Use the reviewer's ID
-          ]
-        );
-        
-        // Update the price list item status
-        await db.query(
-          `UPDATE price_list_items 
-           SET status = 'applied', 
-               new_selling_price = $1,
-               margin_percent = $2
-           WHERE id = $3`,
-          [
-            newSellingPrice,
-            PricingCalculator.calculateMargin(newCostPrice, newSellingPrice),
-            item.id
+            item.matched_product_id, importId, 'cost_price', 
+            oldProduct.cost_price, item.new_cost_price,
+            oldProduct.selling_price, oldProduct.selling_price, // Keeping same for now
+            'supplier_update', 1 // System user
           ]
         );
       }
     }
 
-    // Update import status with statistics
+    // Update import status
     await db.query(
       `UPDATE price_list_imports 
-       SET status = 'applied', 
-           applied_date = NOW(), 
-           applied_by = $1,
-           notes = $2
-       WHERE id = $3`,
-      [
-        importDetails.reviewed_by || 1, 
-        `Applied ${stats.costPriceUpdates} cost price updates and ${stats.sellingPriceUpdates} selling price updates. ${stats.belowMinimumMargin} items were below minimum margin.`,
-        importId
-      ]
+       SET status = 'applied', applied_date = NOW(), applied_by = $1 
+       WHERE id = $2`,
+      [1, importId] // System user
     );
-    
-    console.log(`Price changes applied for import #${importId}. Stats: ${JSON.stringify(stats)}`);
-    return stats;
 
   } catch (error) {
     console.error("Error applying price changes:", error);

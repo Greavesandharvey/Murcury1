@@ -20,9 +20,19 @@ const pool = new Pool({
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -74,6 +84,11 @@ app.post('/api/price-list-imports', upload.single('file'), (req, res, next) => {
   next();
 });
 priceListsRoutes(app, db);
+
+// Serve test API HTML file
+app.get('/test-api', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-api.html'));
+});
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
