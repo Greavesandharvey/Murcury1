@@ -52,7 +52,7 @@ import {
   Clock,
   Refresh
 } from "lucide-react";
-import Layout from "../components/Layout";
+import { Layout } from "../components/Layout";
 
 interface KPI {
   kpi_name: string;
