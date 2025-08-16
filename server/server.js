@@ -97,6 +97,12 @@ require('./routes/document-bridge')(app, db);
 // Reports routes (Business Patch 007)
 require('./routes/reports')(app, db);
 
+// MCP Agent routes (Patch 000E)
+require('./routes/mcp')(app, db);
+
+// Document Sync routes (Patch 000E)
+require('./routes/document-sync')(app, db);
+
 // Serve test API HTML file
 app.get('/test-api', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-api.html'));

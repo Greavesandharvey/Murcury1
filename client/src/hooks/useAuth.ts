@@ -5,7 +5,8 @@ export function useAuth() {
     queryKey: ['/api/auth/user'],
     queryFn: async () => {
       // TODO: replace with real API call when backend is ready
-      return undefined;
+      // For now, return a mock user to skip authentication
+      return { id: 1, name: 'Test User', email: 'test@mercuryone.com' };
     },
     retry: false,
   });
