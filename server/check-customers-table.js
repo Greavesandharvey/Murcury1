@@ -39,25 +39,36 @@ async function checkCustomersTable() {
       // Check if there are any customers
       const countResult = await pool.query('SELECT COUNT(*) FROM customers');
       console.log(`\nTotal customers: ${countResult.rows[0].count}`);
-    } else {
-      console.log('Creating customers table from mercuryone_schema.sql...');
       
-      // Read the schema file
-      const fs = require('fs');
-      const path = require('path');
-      const schemaPath = path.join(__dirname, '..', 'mercuryone_schema.sql');
+      // Try to insert a test customer
+      console.log('\nAttempting to insert a test customer...');
+      const insertResult = await pool.query(`
+        INSERT INTO customers (
+          type, first_name, last_name, email, phone, 
+          address_line_1, city, postcode, country,
+          active, marketing_preferences
+        ) VALUES (
+          'individual', 'Test', 'User', 'test@example.com', '01234 567890',
+          '123 Test Street', 'London', 'SW1A 1AA', 'United Kingdom',
+          true, '{"email": false, "phone": false, "post": false, "sms": false}'
+        ) RETURNING id
+      `);
       
-      if (fs.existsSync(schemaPath)) {
-        const schema = fs.readFileSync(schemaPath, 'utf8');
-        await pool.query(schema);
-        console.log('Customers table created successfully!');
-      } else {
-        console.error('Schema file not found:', schemaPath);
+      if (insertResult.rows.length > 0) {
+        const testCustomerId = insertResult.rows[0].id;
+        console.log(`Successfully inserted test customer with ID: ${testCustomerId}`);
+        
+        // Clean up - delete the test customer
+        await pool.query('DELETE FROM customers WHERE id = $1', [testCustomerId]);
+        console.log('Test customer deleted');
       }
+    } else {
+      console.log('Customers table does not exist!');
     }
     
   } catch (error) {
     console.error('Error checking customers table:', error.message);
+    console.error(error.stack);
   } finally {
     await pool.end();
   }
