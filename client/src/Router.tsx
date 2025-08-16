@@ -7,6 +7,7 @@ import PriceLists from '@/pages/PriceLists';
 import Profile from '@/pages/Profile';
 import InfrastructureDashboardComponent from '@/pages/InfrastructureDashboard';
 import DocumentBridgePage from '@/pages/DocumentBridge';
+import Reports from '@/pages/Reports';
 
 // Placeholder component for routes not yet implemented
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -63,7 +64,7 @@ const XeroSyncHealth = () => <PlaceholderPage name="Xero Sync Health" />;
 const InfrastructureDashboard = () => <InfrastructureDashboardComponent />; // Use actual component
 
 // Advanced Section Routes
-const Reports = () => <PlaceholderPage name="Reports" />;
+const ReportsPage = () => <Reports />;
 const ECommerce = () => <PlaceholderPage name="eCommerce" />;
 const AIArea = () => <PlaceholderPage name="AI Area" />;
 const Communications = () => <PlaceholderPage name="Communications" />;
@@ -114,7 +115,7 @@ export function Router() {
         <Route path="/infrastructure-dashboard" component={InfrastructureDashboard} />
 
         {/* Advanced Section Routes */}
-        <Route path="/reports" component={Reports} />
+        <Route path="/reports" component={ReportsPage} />
         <Route path="/ecommerce" component={ECommerce} />
         <Route path="/ai-area" component={AIArea} />
         <Route path="/communications" component={Communications} />
