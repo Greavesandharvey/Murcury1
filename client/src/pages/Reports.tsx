@@ -50,7 +50,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  Refresh
+  RefreshCw
 } from "lucide-react";
 import { Layout } from "../components/Layout";
 
@@ -315,7 +315,7 @@ const Reports: React.FC = () => {
           </div>
           <div className="flex gap-2">
             <Button onClick={loadInitialData} variant="outline" size="sm">
-              <Refresh className="w-4 h-4 mr-2" />
+              <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button onClick={calculateKPIs} variant="outline" size="sm">
