@@ -6,6 +6,7 @@ import Customers from '@/pages/Customers';
 import PriceLists from '@/pages/PriceLists';
 import Profile from '@/pages/Profile';
 import InfrastructureDashboardComponent from '@/pages/InfrastructureDashboard';
+import DocumentBridgePage from '@/pages/DocumentBridge';
 
 // Placeholder component for routes not yet implemented
 const PlaceholderPage = ({ name }: { name: string }) => (
@@ -56,7 +57,7 @@ const StockMovement = () => <PlaceholderPage name="Stock Movement" />;
 
 // MCP Section Routes
 const MCPDashboard = () => <PlaceholderPage name="MCP Dashboard" />;
-const DocumentSync = () => <PlaceholderPage name="Document Sync" />;
+const DocumentSync = () => <DocumentBridgePage />;
 const MorpheusInbox = () => <PlaceholderPage name="Morpheus Inbox" />;
 const XeroSyncHealth = () => <PlaceholderPage name="Xero Sync Health" />;
 const InfrastructureDashboard = () => <InfrastructureDashboardComponent />; // Use actual component

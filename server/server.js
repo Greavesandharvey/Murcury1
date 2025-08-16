@@ -91,6 +91,9 @@ require('./routes/profile')(app, db);
 // Metrics routes for infrastructure dashboard
 require('./routes/metrics')(app, db);
 
+// Document Bridge routes (Patch 006)
+require('./routes/document-bridge')(app, db);
+
 // Serve test API HTML file
 app.get('/test-api', (req, res) => {
   res.sendFile(path.join(__dirname, 'test-api.html'));
