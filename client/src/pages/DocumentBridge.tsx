@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import Layout from '../components/Layout';
+import { Layout } from '../components/Layout';
 import DocumentBridge from '../components/DocumentBridge';
 
 const DocumentBridgePage: React.FC = () => {
